@@ -5,10 +5,11 @@ import numpy.linalg
 import heapq
 import random
 
-def plot_all(V, name):
+def plot_all(U, V, name):
 
     # Load V
     movies_2d, _, _ = np.linalg.svd(V, full_matrices=True)
+    users_2d, _, _ = np.linalg.svd(U, full_matrices=True)
     master_list = movies_2d[:, [0,1]]
 
     # Load data
@@ -121,3 +122,51 @@ def plot_all(V, name):
         for i, txt in enumerate(random_10_movies):
             plt.annotate(movie_titles[txt - 1], (random_10_x[i],random_10_y[i]))
         plt.savefig(name + " 10 random " + genre[k] + " movies.png")
+
+    # Top and bottom users
+    user_counts = np.bincount(users)
+    top_100_counts = heapq.nlargest(100, user_counts)
+    top_100_users = []
+
+    for i in range(len(top_100_counts)):
+        users_id = np.where(user_counts == top_100_counts[i])[0][0]
+        top_100_users.append(users_id)
+
+    top_100_users = np.asarray(top_100_users)
+
+    s_100_counts = heapq.nsmallest(101, user_counts)[1:]
+    s_100_users = []
+
+    for i in range(len(s_100_counts)):
+        curr_count = s_100_counts[i]
+        if (i > 0): 
+            if (curr_count != prev_count):
+                users_id = np.where(user_counts == s_100_counts[i])[0].tolist()
+                s_100_users += users_id
+            prev_count = curr_count
+        else:
+            users_id = np.where(user_counts == s_100_counts[i])[0].tolist()
+            s_100_users += users_id
+            prev_count = curr_count
+
+    s_100_users = np.asarray(s_100_users)
+
+    # Create master list
+    master_list = users_2d[:, [0,1]]
+    top_100_x, top_100_y = [], []
+    for i in top_100_users:
+        top_100_x.append(master_list[i][0])
+        top_100_y.append(master_list[i][1])
+
+    s_100_x, s_100_y = [], []
+    for i in s_100_users:
+        s_100_x.append(master_list[i][0])
+        s_100_y.append(master_list[i][1])
+
+    # Plot
+    plt.figure(figsize=(10, 10))
+    plt.title("Most active users and least active users by number of ratings")
+    plt.scatter(top_100_x, top_100_y, color='red', label="Most Active")
+    plt.scatter(s_100_x, s_100_y, color='blue', label="Least Active")
+    plt.legend()
+    plt.savefig(name + " Users.png")
