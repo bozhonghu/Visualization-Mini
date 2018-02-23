@@ -61,7 +61,7 @@ def plot_all(V, name):
         movie_dic[i+1] = get_ratings(movies, ratings, i+1)
         
     average_ratings = np.zeros(1682)
-    qualified_number = 20
+    qualified_number = 100
     for i in range(len(average_ratings)):
         movie_i_ratings = movie_dic[i + 1]
         if (len(movie_i_ratings) >= qualified_number):
